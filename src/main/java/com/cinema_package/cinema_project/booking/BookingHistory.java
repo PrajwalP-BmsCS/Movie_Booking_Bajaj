@@ -1,4 +1,4 @@
-package com.cinema_package.cinema_project;
+package com.cinema_package.cinema_project.booking;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;

@@ -1,4 +1,4 @@
-package com.cinema_package.cinema_project;
+package com.cinema_package.cinema_project.user;
 
 import java.util.Optional;
 

@@ -1,10 +1,15 @@
-package com.cinema_package.cinema_project;
+package com.cinema_package.cinema_project.movie;
 
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.List;
+
+import com.cinema_package.cinema_project.CinemaProjectApplication;
+import com.cinema_package.cinema_project.booking.BookingHistory;
+import com.cinema_package.cinema_project.booking.BookingResponse;
+import com.cinema_package.cinema_project.booking.BookingSummary;
 
 @RestController
 @RequestMapping("/movie")
@@ -36,14 +41,14 @@ public class MovieController {
 
     @PostMapping
     public void addMovie(
-            @RequestBody CinemaProjectApplication.NewMovieRequest movie) {
+            @RequestBody NewMovieRequest movie) {
         movieService.addMovie(movie);
     }
 
     @PutMapping("/{movieId}")
     public void updateMovie(
             @PathVariable Integer movieId,
-            @RequestBody CinemaProjectApplication.NewMovieRequest movie) {
+            @RequestBody NewMovieRequest movie) {
         movieService.updateMovie(movieId, movie);
     }
 

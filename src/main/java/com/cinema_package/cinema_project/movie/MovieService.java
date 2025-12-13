@@ -1,4 +1,4 @@
-package com.cinema_package.cinema_project;
+package com.cinema_package.cinema_project.movie;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -9,6 +9,13 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import org.springframework.stereotype.Service;
+
+import com.cinema_package.cinema_project.CinemaProjectApplication;
+import com.cinema_package.cinema_project.booking.BookingHistory;
+import com.cinema_package.cinema_project.booking.BookingHistoryRepository;
+import com.cinema_package.cinema_project.booking.BookingResponse;
+import com.cinema_package.cinema_project.booking.BookingSummary;
+
 import jakarta.transaction.Transactional;
 
 @Service
@@ -70,34 +77,34 @@ public class MovieService {
                         new IllegalArgumentException("Invalid movie ID: " + id));
     }
 
-    public void addMovie(CinemaProjectApplication.NewMovieRequest request) {
+    public void addMovie(NewMovieRequest movie2) {
         Movie movie = new Movie();
-        movie.setTitle(request.title());
-        movie.setDirector(request.director());
-        movie.setDescription(request.description());
-        movie.setGenre(request.genre());
-        movie.setDate(request.date());
-        movie.setLocation(request.location());
-        movie.setTotalSeats(request.totalSeats());
-        movie.setAvailableSeats(request.availableSeats());
-        movie.setPrice(request.price());
+        movie.setTitle(movie2.title());
+        movie.setDirector(movie2.director());
+        movie.setDescription(movie2.description());
+        movie.setGenre(movie2.genre());
+        movie.setDate(movie2.date());
+        movie.setLocation(movie2.location());
+        movie.setTotalSeats(movie2.totalSeats());
+        movie.setAvailableSeats(movie2.availableSeats());
+        movie.setPrice(movie2.price());
         movieRepository.save(movie);
     }
 
     public void updateMovie(Integer id,
-                            CinemaProjectApplication.NewMovieRequest request) {
+                            NewMovieRequest movie2) {
 
         Movie movie = getMovieById(id);
 
-        movie.setTitle(request.title());
-        movie.setDirector(request.director());
-        movie.setDescription(request.description());
-        movie.setGenre(request.genre());
-        movie.setDate(request.date());
-        movie.setLocation(request.location());
-        movie.setTotalSeats(request.totalSeats());
-        movie.setAvailableSeats(request.availableSeats());
-        movie.setPrice(request.price());
+        movie.setTitle(movie2.title());
+        movie.setDirector(movie2.director());
+        movie.setDescription(movie2.description());
+        movie.setGenre(movie2.genre());
+        movie.setDate(movie2.date());
+        movie.setLocation(movie2.location());
+        movie.setTotalSeats(movie2.totalSeats());
+        movie.setAvailableSeats(movie2.availableSeats());
+        movie.setPrice(movie2.price());
 
         movieRepository.save(movie);
     }

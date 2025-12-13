@@ -1,10 +1,14 @@
-package com.cinema_package.cinema_project;
+package com.cinema_package.cinema_project.auth;
 
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.cinema_package.cinema_project.security.JwtUtil;
+import com.cinema_package.cinema_project.user.User;
+import com.cinema_package.cinema_project.user.UserRepository;
 
 
 @RestController

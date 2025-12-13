@@ -1,4 +1,4 @@
-package com.cinema_package.cinema_project;
+package com.cinema_package.cinema_project.security;
 
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
