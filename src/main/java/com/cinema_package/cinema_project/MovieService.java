@@ -1,11 +1,16 @@
 package com.cinema_package.cinema_project;
 
-import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.*;
-
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+
+import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 
 @Service
 public class MovieService {
@@ -85,29 +90,25 @@ public class MovieService {
 
 
 
-    @PostMapping("/booking/{movieId}/{tickets}/{payment}")
-    public void bookTickets(
-            @PathVariable("movieId") Integer id,
-            @PathVariable("tickets") Integer tickets,
-            @PathVariable("payment") Integer payment
-    ) {
-        Movie movie = getMovieById(id);
+    // @PostMapping("/booking/{movieId}/{tickets}/{payment}")
+// ❌ REMOVE @PostMapping FROM HERE
+public void bookTickets(Integer id, Integer tickets, Integer payment) {
 
-        int availableSeats = movie.getAvailableSeats();
-        if (tickets > availableSeats) {
-            throw new IllegalArgumentException("No seats available at this time.");
-        }
+    Movie movie = getMovieById(id);
 
-        int calculatedTotalPrice = tickets * movie.getPrice();
-        if (!payment.equals(calculatedTotalPrice)) {
-            throw new IllegalArgumentException("Invalid total price.");
-        }
-
-        availableSeats -= tickets;
-        movie.setAvailableSeats(availableSeats);
-
-        movieRepository.save(movie);
+    int availableSeats = movie.getAvailableSeats();
+    if (tickets > availableSeats) {
+        throw new IllegalArgumentException("No seats available at this time.");
     }
+
+    int calculatedTotalPrice = tickets * movie.getPrice();
+    if (!payment.equals(calculatedTotalPrice)) {
+        throw new IllegalArgumentException("Invalid total price.");
+    }
+
+    movie.setAvailableSeats(availableSeats - tickets);
+    movieRepository.save(movie);
+}
 
     @PostMapping
     public void addMovie(@RequestBody CinemaProjectApplication.NewMovieRequest request) {
