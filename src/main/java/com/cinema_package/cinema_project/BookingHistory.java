@@ -1,69 +1,62 @@
 package com.cinema_package.cinema_project;
 
-import java.time.LocalDate;
+import jakarta.persistence.*;
+import java.time.LocalDateTime;
 
+@Entity
+@Table(name = "booking_history")
 public class BookingHistory {
-        private int id;
-        private String title;
-        private String director;
-        private String description;
-        private String genre;
-        private LocalDate date;
-        private String location;
-        private int bookedTickets;
-        private int totalPrice;
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
+    private Long movieId;
 
-    public BookingHistory(int id, String title, String director, String description, String genre, LocalDate date, String location, int bookedTickets, int totalPrice) {
-        this.id = id;
-        this.title = title;
-        this.director = director;
-        this.description = description;
-        this.genre = genre;
-        this.date = date;
-        this.location = location;
-        this.bookedTickets = bookedTickets;
-        this.totalPrice = totalPrice;
-    }
+    private String userEmail;   
+
+    private int bookedTickets;
+
+    private int totalPrice;
+
+    private LocalDateTime bookedAt;
 
     public BookingHistory() {}
 
-        public int getId() {return id;}
+    public BookingHistory(Long movieId, int bookedTickets,
+                          int totalPrice, LocalDateTime bookedAt) {
+        this.movieId = movieId;
+        this.bookedTickets = bookedTickets;
+        this.totalPrice = totalPrice;
+        this.bookedAt = bookedAt;
+    }
 
-        public void setId(int id) {this.id = id;}
+    public Long getId() { return id; }
 
-        public String getTitle() {return title;}
+    public Long getMovieId() { return movieId; }
 
-        public void setTitle(String title) {this.title = title;}
+    public void setMovieId(Long movieId) { this.movieId = movieId; }
 
-        public String getDirector() {return director;}
+    public int getBookedTickets() { return bookedTickets; }
 
-        public void setDirector(String director) {this.director = director;}
+    public void setBookedTickets(int bookedTickets) {
+        this.bookedTickets = bookedTickets;
+    }
+    public void setUserEmail(String userEmail) {
+        this.userEmail = userEmail;
+    }
+    public String getUserEmail() { return userEmail; }
 
-        public String getDescription() {return description;}
+    public int getTotalPrice() { return totalPrice; }
 
-        public void setDescription(String description) {this.description = description;}
+    public void setTotalPrice(int totalPrice) {
+        this.totalPrice = totalPrice;
+    }
 
-        public String getGenre() {return genre;}
+    public LocalDateTime getBookedAt() { return bookedAt; }
 
-        public void setGenre(String genre) {this.genre = genre;}
-
-        public LocalDate getDate() {return date;}
-
-        public void setDate(LocalDate date) {this.date = date;}
-
-        public String getLocation() {return location;}
-
-        public void setLocation(String location) {this.location = location;}
-
-        public int getBookedTickets() {return bookedTickets;}
-
-        public void setBookedTickets(int bookedTickets) {this.bookedTickets = bookedTickets;}
-
-        public int getTotalPrice() {return totalPrice;}
-
-        public void setTotalPrice(int totalPrice) {this.totalPrice = totalPrice;}
+    public void setBookedAt(LocalDateTime bookedAt) {
+        this.bookedAt = bookedAt;
+    }
 }
-
 
