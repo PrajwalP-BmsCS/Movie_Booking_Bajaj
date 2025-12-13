@@ -7,14 +7,16 @@ import java.util.List;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-
 import org.springframework.stereotype.Service;
 
-import com.cinema_package.cinema_project.CinemaProjectApplication;
 import com.cinema_package.cinema_project.booking.BookingHistory;
 import com.cinema_package.cinema_project.booking.BookingHistoryRepository;
 import com.cinema_package.cinema_project.booking.BookingResponse;
 import com.cinema_package.cinema_project.booking.BookingSummary;
+import com.cinema_package.cinema_project.booking.SeatBookingRequest;
+import com.cinema_package.cinema_project.enums.SeatStatus;
+import com.cinema_package.cinema_project.seat.Seat;
+import com.cinema_package.cinema_project.seat.SeatRepository;
 
 import jakarta.transaction.Transactional;
 
@@ -23,11 +25,15 @@ public class MovieService {
 
     private final MovieRepository movieRepository;
     private final BookingHistoryRepository bookingHistoryRepository;
+    private final SeatRepository seatRepository;
 
     public MovieService(MovieRepository movieRepository,
-                        BookingHistoryRepository bookingHistoryRepository) {
+                        BookingHistoryRepository bookingHistoryRepository,
+                        SeatRepository seatRepository) {
         this.movieRepository = movieRepository;
         this.bookingHistoryRepository = bookingHistoryRepository;
+        this.seatRepository = seatRepository;
+
     }
 
     /* ---------------- MOVIE APIs ---------------- */
@@ -88,8 +94,31 @@ public class MovieService {
         movie.setTotalSeats(movie2.totalSeats());
         movie.setAvailableSeats(movie2.availableSeats());
         movie.setPrice(movie2.price());
-        movieRepository.save(movie);
+        Movie savedMovie = movieRepository.save(movie);
+        generateSeatsForMovie(savedMovie.getId());
+
     }
+
+    private void generateSeatsForMovie(Integer movieId) {
+
+    // safety check (optional but good)
+    if (!seatRepository.findByMovieId(movieId).isEmpty()) {
+        return;
+    }
+
+    for (char row = 'A'; row <= 'E'; row++) {
+        for (int seatNum = 1; seatNum <= 10; seatNum++) {
+
+            Seat seat = new Seat();
+            seat.setMovieId(movieId);
+            seat.setSeatNumber(row + String.valueOf(seatNum));
+            seat.setStatus(SeatStatus.AVAILABLE);
+
+            seatRepository.save(seat);
+        }
+    }
+}
+
 
     public void updateMovie(Integer id,
                             NewMovieRequest movie2) {
@@ -142,9 +171,58 @@ public class MovieService {
     }
 
     /* ---------------- REAL BOOKING (DB + TRANSACTION) ---------------- */
-
 @Transactional
-public BookingResponse bookMovie(Integer movieId, int tickets, int payment) {
+public BookingResponse bookSelectedSeats(SeatBookingRequest request) {
+
+    Authentication auth =
+        SecurityContextHolder.getContext().getAuthentication();
+    String userEmail = auth.getName();
+
+    List<Seat> seats =
+        seatRepository.findByMovieIdAndSeatNumberIn(
+            request.getMovieId(),
+            request.getSeats()
+        );
+
+    if (seats.size() != request.getSeats().size()) {
+        throw new IllegalArgumentException("One or more seats not found");
+    }
+
+    for (Seat seat : seats) {
+        if (seat.getStatus() != SeatStatus.AVAILABLE) {
+            throw new IllegalArgumentException(
+                "Seat not available: " + seat.getSeatNumber()
+            );
+        }
+    }
+
+    // Mark seats BOOKED
+    for (Seat seat : seats) {
+        seat.setStatus(SeatStatus.BOOKED);
+    }
+
+    seatRepository.saveAll(seats);
+
+    // Save booking history
+    BookingHistory booking = new BookingHistory();
+    booking.setUserEmail(userEmail);
+    booking.setMovieId(request.getMovieId().longValue());
+    booking.setBookedTickets(seats.size());
+    booking.setTotalPrice(seats.size() * 250); // or calculate dynamically
+    booking.setBookedAt(LocalDateTime.now());
+
+    BookingHistory saved =
+        bookingHistoryRepository.save(booking);
+
+    return new BookingResponse(
+        saved.getId(),
+        "SUCCESS",
+        seats.size()
+    );
+}
+
+    @Transactional
+    public BookingResponse bookMovie(Integer movieId, int tickets, int payment) {
 
     Movie movie = getMovieById(movieId);
     Authentication auth =
@@ -191,4 +269,18 @@ public BookingResponse bookMovie(Integer movieId, int tickets, int payment) {
     public List<BookingHistory> getAllBookings() {
         return bookingHistoryRepository.findAll();
     }
+
+    public List<BookingHistory> getMyBookings() {
+    String email = SecurityContextHolder
+            .getContext()
+            .getAuthentication()
+            .getName();
+
+    System.out.println("Fetching bookings for user: " + email);
+    System.out.println("Repository instance: " + bookingHistoryRepository.findByUserEmail(email));
+
+    return bookingHistoryRepository.findByUserEmail(email);
+    
+    }
+
 }

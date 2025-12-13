@@ -1,17 +1,28 @@
 package com.cinema_package.cinema_project.security;
 
+import java.io.IOException;
+import java.util.List;
+
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.filter.OncePerRequestFilter;
+
+import com.cinema_package.cinema_project.user.User;
+import com.cinema_package.cinema_project.user.UserRepository;
+
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.filter.OncePerRequestFilter;
-
-import java.io.IOException;
-import java.util.Collections;
 
 public class JwtFilter extends OncePerRequestFilter {
+
+    private final UserRepository userRepository;
+
+    public JwtFilter(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
@@ -27,11 +38,19 @@ public class JwtFilter extends OncePerRequestFilter {
                 String email = JwtUtil.validateTokenAndGetEmail(token);
                 System.out.println("JWT validated for: " + email);
 
+                User user = userRepository.findByEmail(email)
+                        .orElseThrow(() -> new RuntimeException("User not found"));
 
-                // 🔑 THIS IS THE IMPORTANT PART
+                // 👇 Convert role to authority
+                SimpleGrantedAuthority authority =
+                        new SimpleGrantedAuthority("ROLE_" + user.getRole().name());
+
                 UsernamePasswordAuthenticationToken auth =
                         new UsernamePasswordAuthenticationToken(
-                                email, null, Collections.emptyList());
+                                user.getEmail(),
+                                null,
+                                List.of(authority)
+                        );
 
                 SecurityContextHolder.getContext().setAuthentication(auth);
 
@@ -43,4 +62,5 @@ public class JwtFilter extends OncePerRequestFilter {
 
         filterChain.doFilter(request, response);
     }
+    
 }

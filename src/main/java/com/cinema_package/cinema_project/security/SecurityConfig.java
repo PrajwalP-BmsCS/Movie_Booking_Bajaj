@@ -2,15 +2,28 @@ package com.cinema_package.cinema_project.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import com.cinema_package.cinema_project.user.UserRepository;
+
 @Configuration
+@EnableMethodSecurity   // 👈 REQUIRED for @PreAuthorize
 public class SecurityConfig {
 
     @Bean
-    SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    public JwtFilter jwtFilter(UserRepository userRepository) {
+        return new JwtFilter(userRepository);
+    }
+
+    @Bean
+    public SecurityFilterChain filterChain(
+            HttpSecurity http,
+            UserRepository userRepository
+    ) throws Exception {
 
         http
             .csrf(csrf -> csrf.disable())
@@ -19,9 +32,8 @@ public class SecurityConfig {
                 .requestMatchers("/auth/**").permitAll()
 
                 // public movie browsing
-                .requestMatchers("/movie").permitAll()
-                .requestMatchers("/movie/").permitAll()
-                .requestMatchers("/movie/*").permitAll()
+                .requestMatchers(HttpMethod.GET, "/movie", "/movie/", "/movie/*","/movie/*/*").permitAll()
+
 
                 // booking MUST be authenticated
                 .requestMatchers("/movie/booking/**").authenticated()
@@ -30,7 +42,7 @@ public class SecurityConfig {
                 .anyRequest().authenticated()
             )
             .addFilterBefore(
-                new JwtFilter(),
+                jwtFilter(userRepository),
                 UsernamePasswordAuthenticationFilter.class
             );
 

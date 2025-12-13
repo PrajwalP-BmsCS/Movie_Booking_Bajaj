@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.cinema_package.cinema_project.enums.Role;
 import com.cinema_package.cinema_project.security.JwtUtil;
 import com.cinema_package.cinema_project.user.User;
 import com.cinema_package.cinema_project.user.UserRepository;
@@ -26,9 +27,11 @@ public class AuthController {
 
     @PostMapping("/register")
     public String register(@RequestBody User user) {
-
+        user.setRole(Role.USER);
         user.setPassword(encoder.encode(user.getPassword()));
         userRepository.save(user);
+
+        
 
         return "User registered successfully";
     }
