@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.cinema_package.cinema_project.booking.BookingHistory;
 import com.cinema_package.cinema_project.booking.BookingResponse;
-import com.cinema_package.cinema_project.booking.BookingSummary;
 import com.cinema_package.cinema_project.booking.SeatBookingRequest;
 import com.cinema_package.cinema_project.booking.SeatHoldRequest;
 
@@ -86,14 +85,14 @@ public class MovieController {
         return "Seats held successfully (5 min)";
     }
 
-    @PostMapping("/booking/{movieId}/{quantity}/{totalPrice}")
-    public BookingResponse createBooking(
-            @PathVariable Integer movieId,
-            @PathVariable Integer quantity,
-            @PathVariable Integer totalPrice
-    ) {
-        return movieService.bookMovie(movieId, quantity, totalPrice);
-    }
+    // @PostMapping("/booking/{movieId}/{quantity}/{totalPrice}")
+    // public BookingResponse createBooking(
+    //         @PathVariable Integer movieId,
+    //         @PathVariable Integer quantity,
+    //         @PathVariable Integer totalPrice
+    // ) {
+    //     return movieService.bookMovie(movieId, quantity, totalPrice);
+    // }
 
     // ✅ READ BOOKING HISTORY FROM DB
     @GetMapping("/bookings")
@@ -101,11 +100,6 @@ public class MovieController {
         return movieService.getAllBookings();
     }
 
-    // ✅ SUMMARY (COMPUTED, NOT DB)
-    @GetMapping("/booking/summary")
-    public List<BookingSummary> getBookingSummary() {
-        return movieService.getBookingSummary();
-    }
 
     @GetMapping("/booking/my")
     public List<BookingHistory> myBookings() {

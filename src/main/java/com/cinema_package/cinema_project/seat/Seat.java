@@ -2,6 +2,7 @@ package com.cinema_package.cinema_project.seat;
 
 import java.time.LocalDateTime;
 
+import com.cinema_package.cinema_project.enums.SeatCategory;
 import com.cinema_package.cinema_project.enums.SeatStatus;
 
 import jakarta.persistence.Column;
@@ -19,7 +20,7 @@ import jakarta.persistence.UniqueConstraint;
     name = "seats",
     uniqueConstraints = {
         @UniqueConstraint(
-            columnNames = {"movie_id", "seat_number"}
+            columnNames = {"show_id", "seat_number"}
         )
     }
 )
@@ -29,8 +30,13 @@ public class Seat {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "movie_id", nullable = false)
+    // 🔴 LEGACY (temporary, keep for migration safety)
+    @Column(name = "movie_id")
     private Integer movieId;
+
+    // ✅ NEW — booking should use this
+    @Column(name = "show_id", nullable = false)
+    private Long showId;
 
     @Column(name = "seat_number", nullable = false)
     private String seatNumber;   // A1, A2, B5...
@@ -39,26 +45,75 @@ public class Seat {
     @Column(nullable = false)
     private SeatStatus status = SeatStatus.AVAILABLE;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private SeatCategory category;   // REGULAR / PREMIUM
+
     private String heldByUser;   // user email
 
     private LocalDateTime holdUntil;
 
-    /* getters & setters */
+    /* ---------------- GETTERS / SETTERS ---------------- */
 
-    public Long getId() { return id; }
+    public Long getId() {
+        return id;
+    }
 
-    public Integer getMovieId() { return movieId; }
-    public void setMovieId(Integer movieId) { this.movieId = movieId; }
+    // LEGACY
+    public Integer getMovieId() {
+        return movieId;
+    }
 
-    public String getSeatNumber() { return seatNumber; }
-    public void setSeatNumber(String seatNumber) { this.seatNumber = seatNumber; }
+    public void setMovieId(Integer movieId) {
+        this.movieId = movieId;
+    }
 
-    public SeatStatus getStatus() { return status; }
-    public void setStatus(SeatStatus status) { this.status = status; }
+    // NEW
+    public Long getShowId() {
+        return showId;
+    }
 
-    public String getHeldByUser() { return heldByUser; }
-    public void setHeldByUser(String heldByUser) { this.heldByUser = heldByUser; }
+    public void setShowId(Long showId) {
+        this.showId = showId;
+    }
 
-    public LocalDateTime getHoldUntil() { return holdUntil; }
-    public void setHoldUntil(LocalDateTime holdUntil) { this.holdUntil = holdUntil; }
+    public String getSeatNumber() {
+        return seatNumber;
+    }
+
+    public void setSeatNumber(String seatNumber) {
+        this.seatNumber = seatNumber;
+    }
+
+    public SeatStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(SeatStatus status) {
+        this.status = status;
+    }
+
+    public SeatCategory getCategory() {
+        return category;
+    }
+
+    public void setCategory(SeatCategory category) {
+        this.category = category;
+    }
+
+    public String getHeldByUser() {
+        return heldByUser;
+    }
+
+    public void setHeldByUser(String heldByUser) {
+        this.heldByUser = heldByUser;
+    }
+
+    public LocalDateTime getHoldUntil() {
+        return holdUntil;
+    }
+
+    public void setHoldUntil(LocalDateTime holdUntil) {
+        this.holdUntil = holdUntil;
+    }
 }

@@ -3,15 +3,15 @@ package com.cinema_package.cinema_project.booking;
 import java.util.List;
 
 public class SeatBookingRequest {
-    private Integer movieId;
+    private Long showId;
     private List<String> seats;
 
-    public Integer getMovieId() {
-        return movieId;
+    public Long getShowId() {
+        return showId;
     }
 
-    public void setMovieId(Integer movieId) {
-        this.movieId = movieId;
+    public void setShowId(Long showId) {
+        this.showId = showId;
     }
 
     public List<String> getSeats() {

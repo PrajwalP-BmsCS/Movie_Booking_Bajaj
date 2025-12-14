@@ -30,6 +30,13 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 // auth endpoints
                 .requestMatchers("/auth/**").permitAll()
+                
+                // 🔓 Swagger / OpenAPI
+                .requestMatchers(
+                    "/swagger-ui.html",
+                    "/swagger-ui/**",
+                    "/v3/api-docs/**"
+                ).permitAll()
 
                 // public movie browsing
                 .requestMatchers(HttpMethod.GET, "/movie", "/movie/", "/movie/*","/movie/*/*").permitAll()

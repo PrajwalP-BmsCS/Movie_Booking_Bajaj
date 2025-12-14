@@ -27,5 +27,13 @@ public interface SeatRepository extends JpaRepository<Seat, Long> {
         List<String> seatNumbers
 );
 
+    List<Seat> findByShowIdAndSeatNumberIn(
+    Long showId,
+    List<String> seatNumbers
+);
 
+    List<Seat> findByShowIdOrderBySeatNumberAsc(Long showId);
+
+
+    
 }
