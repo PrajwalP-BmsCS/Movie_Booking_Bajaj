@@ -14,6 +14,7 @@ import com.cinema_package.cinema_project.booking.BookingHistoryRepository;
 import com.cinema_package.cinema_project.booking.BookingResponse;
 import com.cinema_package.cinema_project.booking.BookingSummary;
 import com.cinema_package.cinema_project.booking.SeatBookingRequest;
+import com.cinema_package.cinema_project.booking.SeatHoldRequest;
 import com.cinema_package.cinema_project.enums.SeatStatus;
 import com.cinema_package.cinema_project.seat.Seat;
 import com.cinema_package.cinema_project.seat.SeatRepository;
@@ -175,52 +176,68 @@ public class MovieService {
 public BookingResponse bookSelectedSeats(SeatBookingRequest request) {
 
     Authentication auth =
-        SecurityContextHolder.getContext().getAuthentication();
+            SecurityContextHolder.getContext().getAuthentication();
     String userEmail = auth.getName();
 
     List<Seat> seats =
-        seatRepository.findByMovieIdAndSeatNumberIn(
-            request.getMovieId(),
-            request.getSeats()
-        );
+            seatRepository.findByMovieIdAndSeatNumberIn(
+                    request.getMovieId(),
+                    request.getSeats()
+            );
 
     if (seats.size() != request.getSeats().size()) {
         throw new IllegalArgumentException("One or more seats not found");
     }
 
+    LocalDateTime now = LocalDateTime.now();
+
     for (Seat seat : seats) {
-        if (seat.getStatus() != SeatStatus.AVAILABLE) {
+
+        // HOLD expired → reset
+        if (seat.getStatus() == SeatStatus.HELD &&
+            seat.getHoldUntil().isBefore(now)) {
+
+            seat.setStatus(SeatStatus.AVAILABLE);
+            seat.setHeldByUser(null);
+            seat.setHoldUntil(null);
+        }
+
+        // ❗ STRICT PHASE-5 RULE
+        if (seat.getStatus() != SeatStatus.HELD ||
+            !userEmail.equals(seat.getHeldByUser())) {
+
             throw new IllegalArgumentException(
-                "Seat not available: " + seat.getSeatNumber()
+                "Seat must be held by you before booking: "
+                + seat.getSeatNumber()
             );
         }
     }
 
-    // Mark seats BOOKED
+    // BOOK seats
     for (Seat seat : seats) {
         seat.setStatus(SeatStatus.BOOKED);
+        seat.setHeldByUser(null);
+        seat.setHoldUntil(null);
     }
 
     seatRepository.saveAll(seats);
 
-    // Save booking history
     BookingHistory booking = new BookingHistory();
     booking.setUserEmail(userEmail);
     booking.setMovieId(request.getMovieId().longValue());
     booking.setBookedTickets(seats.size());
-    booking.setTotalPrice(seats.size() * 250); // or calculate dynamically
+    booking.setTotalPrice(seats.size() * 250);
     booking.setBookedAt(LocalDateTime.now());
 
     BookingHistory saved =
-        bookingHistoryRepository.save(booking);
+            bookingHistoryRepository.save(booking);
 
     return new BookingResponse(
-        saved.getId(),
-        "SUCCESS",
-        seats.size()
+            saved.getId(),
+            "SUCCESS",
+            seats.size()
     );
 }
-
     @Transactional
     public BookingResponse bookMovie(Integer movieId, int tickets, int payment) {
 
@@ -263,6 +280,57 @@ public BookingResponse bookSelectedSeats(SeatBookingRequest request) {
             movie.getAvailableSeats()
     );
 }
+
+
+@Transactional
+public void holdSeats(SeatHoldRequest request) {
+
+    String userEmail = SecurityContextHolder
+            .getContext()
+            .getAuthentication()
+            .getName();
+
+    List<Seat> seats =
+        seatRepository.findByMovieIdAndSeatNumberIn(
+            request.getMovieId(),
+            request.getSeats()
+        );
+
+    if (seats.size() != request.getSeats().size()) {
+        throw new IllegalArgumentException("Invalid seat selection");
+    }
+
+    LocalDateTime now = LocalDateTime.now();
+
+    for (Seat seat : seats) {
+
+        // Cleanup expired HOLD
+        if (seat.getStatus() == SeatStatus.HELD &&
+            seat.getHoldUntil().isBefore(now)) {
+
+            seat.setStatus(SeatStatus.AVAILABLE);
+            seat.setHeldByUser(null);
+            seat.setHoldUntil(null);
+        }
+
+        if (seat.getStatus() != SeatStatus.AVAILABLE) {
+            throw new IllegalArgumentException(
+                "Seat not available: " + seat.getSeatNumber()
+            );
+        }
+    }
+
+    // Apply HOLD
+    for (Seat seat : seats) {
+        seat.setStatus(SeatStatus.HELD);
+        seat.setHeldByUser(userEmail);
+        seat.setHoldUntil(now.plusMinutes(5));
+    }
+
+    seatRepository.saveAll(seats);
+}
+
+
 
     /* ---------------- READ BOOKING HISTORY FROM DB ---------------- */
 

@@ -19,6 +19,7 @@ import com.cinema_package.cinema_project.booking.BookingHistory;
 import com.cinema_package.cinema_project.booking.BookingResponse;
 import com.cinema_package.cinema_project.booking.BookingSummary;
 import com.cinema_package.cinema_project.booking.SeatBookingRequest;
+import com.cinema_package.cinema_project.booking.SeatHoldRequest;
 
 @RestController
 @RequestMapping("/movie")
@@ -79,6 +80,11 @@ public class MovieController {
         return movieService.bookSelectedSeats(request);
     }
 
+    @PostMapping("/booking/hold")
+    public String holdSeats(@RequestBody SeatHoldRequest request) {
+        movieService.holdSeats(request);
+        return "Seats held successfully (5 min)";
+    }
 
     @PostMapping("/booking/{movieId}/{quantity}/{totalPrice}")
     public BookingResponse createBooking(
