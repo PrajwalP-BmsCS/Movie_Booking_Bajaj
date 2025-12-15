@@ -43,15 +43,15 @@ public class ShowService {
         show.setAvailableSeats(totalSeats);
         Show savedShow = showRepository.save(show);
 
-        generateSeatsForShow(savedShow.getId());
+        generateSeatsForShow(savedShow);
 
         return savedShow;
     }
 
-    private void generateSeatsForShow(Long showId) {
+    private void generateSeatsForShow(Show show) {
 
         // safety: avoid duplicate seats
-        if (!seatRepository.findByShowIdOrderBySeatNumberAsc(showId).isEmpty()) {
+        if (!seatRepository.findByShowIdOrderBySeatNumberAsc(show.getId()).isEmpty()) {
             return;
         }
 
@@ -60,7 +60,7 @@ public class ShowService {
         for (char row = 'A'; row <= 'E'; row++) {
             for (int col = 1; col <= 10; col++) {
                 Seat seat = new Seat();
-                seat.setShowId(showId);
+                seat.setShow(show);
                 seat.setSeatNumber(row + String.valueOf(col));
                 seat.setStatus(SeatStatus.AVAILABLE);
                 if (row <= 'C') {

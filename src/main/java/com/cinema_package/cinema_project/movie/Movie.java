@@ -1,13 +1,18 @@
 package com.cinema_package.cinema_project.movie;
 
 import java.time.LocalDate;
+import java.util.List;
 
 import org.springframework.format.annotation.DateTimeFormat;
 
+import com.cinema_package.cinema_project.venue.Show;
+
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 
@@ -25,6 +30,14 @@ public class Movie {
             generator = "movie_id_sequence"
     )
     private int id;
+
+    @OneToMany(
+        mappedBy = "movie",
+        cascade = CascadeType.ALL,
+        orphanRemoval = true
+    )
+    private List<Show> shows;
+
     private String title;
     private String director;
     private String description;

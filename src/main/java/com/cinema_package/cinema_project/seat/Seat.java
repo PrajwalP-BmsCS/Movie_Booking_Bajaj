@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 
 import com.cinema_package.cinema_project.enums.SeatCategory;
 import com.cinema_package.cinema_project.enums.SeatStatus;
+import com.cinema_package.cinema_project.venue.Show;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -12,6 +13,8 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 
@@ -35,8 +38,12 @@ public class Seat {
     private Integer movieId;
 
     // ✅ NEW — booking should use this
-    @Column(name = "show_id", nullable = false)
-    private Long showId;
+    // @Column(name = "show_id", nullable = false)
+    // private Long showId;
+
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "show_id", nullable = false)
+    private Show show;
 
     @Column(name = "seat_number", nullable = false)
     private String seatNumber;   // A1, A2, B5...
@@ -69,12 +76,12 @@ public class Seat {
     }
 
     // NEW
-    public Long getShowId() {
-        return showId;
+    public Show getShow() {
+        return show;
     }
 
-    public void setShowId(Long showId) {
-        this.showId = showId;
+    public void setShow(Show show) {
+        this.show = show;
     }
 
     public String getSeatNumber() {
